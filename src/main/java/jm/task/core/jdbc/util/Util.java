@@ -18,7 +18,7 @@ import java.util.Properties;
 
 public class Util {
     // реализуйте настройку соеденения с БД
-   // private Connection connection;
+    private SessionFactory sessionFactory;
     public Connection getConnection(){
         Connection conn;
 
@@ -51,14 +51,7 @@ public class Util {
     }
 
     public SessionFactory getSessionFactory(){
-        try{
-            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-        }
-        catch(Exception ex){
-            System.out.println("JDBC driver failed...");
-            System.out.println(ex);
-        }
-
+        if(sessionFactory!=null) return sessionFactory;
         try{
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
@@ -82,8 +75,7 @@ public class Util {
                 .applySettings(configuration.getProperties()).build();
 
         SessionFactory sf = configuration.buildSessionFactory(serviceRegistry);
-
-        System.out.println(sf);
-        return sf;
+        sessionFactory = sf;
+        return sessionFactory;
     }
 }

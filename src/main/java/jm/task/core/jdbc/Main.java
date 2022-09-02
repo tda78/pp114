@@ -20,18 +20,18 @@ public class Main {
 
 
      //   service.dropUsersTable();
-        service.createUsersTable();
-     //   service.saveUser("ivan","leonov", (byte) 25);
-     //   service.saveUser("aaa","ssssss", (byte) 43);
+      //  service.createUsersTable();
+      //  service.saveUser("ivan","leonov", (byte) 25);
+       // service.saveUser("aaa","ssssss", (byte) 43);
        // service.dropUsersTable();
-        service.removeUserById(2);
+      //  service.removeUserById(2);
        // service.cleanUsersTable();
-   /*    List<User> users =  service.getAllUsers();
+       List<User> users =  service.getAllUsers();
        for(User user: users){
            System.out.println( user.getId() + "  "
                    + user.getName() + "  "
                    + user.getLastName() + "  "
                    + user.getAge());
-       }*/
+       }
     }
 }
