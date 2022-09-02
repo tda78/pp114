@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
+import javax.transaction.Transactional;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,7 +16,8 @@ import java.util.List;
 public class UserDaoHibernateImpl implements UserDao {
     private static SessionFactory sf = new Util().getSessionFactory();
 
-    public UserDaoHibernateImpl() {}
+    public UserDaoHibernateImpl() {
+    }
 
     @Override
     public void createUsersTable() {
@@ -29,7 +31,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void dropUsersTable() {
-        try(Session session = sf.openSession();) {
+        try (Session session = sf.openSession();) {
             session.beginTransaction();
             Query query = session.createSQLQuery("drop table if exists users");
             query.executeUpdate();
@@ -40,21 +42,30 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void saveUser(String name, String lastName, byte age) {
         User user = new User(name, lastName, age);
-       try(Session session = sf.openSession();) {
-           session.beginTransaction();
-           session.save(user);
-           session.getTransaction().commit();
-       }
+        try (Session session = sf.openSession();) {
+            session.beginTransaction();
+            try {
+                session.save(user);
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+            }
+        }
     }
 
     @Override
     public void removeUserById(long id) {
-        try(Session session = sf.openSession();) {
+        try (Session session = sf.openSession();) {
             session.beginTransaction();
-            session.createQuery("delete User where id = :id")
-                    .setLong("id", id)
-                    .executeUpdate();
-            session.getTransaction().commit();
+            try {
+                session.createQuery("delete User where id = :id")
+                        .setLong("id", id)
+                        .executeUpdate();
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+            }
+
         }
     }
 
@@ -63,8 +74,12 @@ public class UserDaoHibernateImpl implements UserDao {
         List<User> result = null;
         try (Session session = sf.openSession();) {
             session.beginTransaction();
-            result = session.createQuery("from User").list();
-            session.getTransaction().commit();
+            try {
+                result = session.createQuery("from User").list();
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+            }
         }
         return result;
     }
@@ -73,9 +88,13 @@ public class UserDaoHibernateImpl implements UserDao {
     public void cleanUsersTable() {
         try (Session session = sf.openSession();) {
             session.beginTransaction();
-            session.createQuery("delete User")
-                    .executeUpdate();
-            session.getTransaction().commit();
+            try {
+                session.createQuery("delete User")
+                        .executeUpdate();
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+            }
         }
     }
 }
