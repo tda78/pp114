@@ -3,10 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +22,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void createUsersTable() {
         try {
-            executeUpdate("create table users (id int NOT NULL AUTO_INCREMENT, name text, lastName text, age int, PRIMARY KEY (id))");
+            executeUpdate("create table if not exists users (id int NOT NULL AUTO_INCREMENT, name text, lastName text, age int, PRIMARY KEY (id))");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -33,7 +30,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void dropUsersTable() {
         try {
-            executeUpdate("drop table users");
+            executeUpdate("drop table if exists users");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -41,8 +38,12 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
         try {
-            executeUpdate("insert into users(name, lastName, age) values ('"
-                    + name + "', '" + lastName + "', " + age + ")");
+            String sql = "insert into users(name, lastName, age) values (?, ?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setByte(3, age);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println("can't save this user." + e.getMessage());
         }
@@ -50,7 +51,10 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         try {
-            executeUpdate("delete from users where id = " + id);
+            String sql = "delete from users where id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println(" can't delete user " + id);
         }
@@ -71,7 +75,7 @@ public class UserDaoJDBCImpl implements UserDao {
                 users.add(user);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
         return users;
     }
@@ -80,8 +84,7 @@ public class UserDaoJDBCImpl implements UserDao {
         try {
             executeUpdate("delete from users");
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            System.out.println(e.getMessage());       }
 
     }
 }

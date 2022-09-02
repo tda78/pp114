@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.Provider;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -19,7 +18,7 @@ import java.util.Properties;
 
 public class Util {
     // реализуйте настройку соеденения с БД
-    Connection connection;
+   // private Connection connection;
     public Connection getConnection(){
         Connection conn;
 
@@ -60,7 +59,6 @@ public class Util {
             System.out.println(ex);
         }
 
-
         try{
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
@@ -87,6 +85,5 @@ public class Util {
 
         System.out.println(sf);
         return sf;
-
     }
 }
