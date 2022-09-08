@@ -77,15 +77,14 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void cleanUsersTable() {
-        try (Session session = sessionFactory.openSession();) {
+        Session session = sessionFactory.openSession();
+        try {
             session.beginTransaction();
-            try {
-                session.createQuery("delete User")
-                        .executeUpdate();
-                session.getTransaction().commit();
-            } catch (Exception e) {
-                session.getTransaction().rollback();
-            }
+            session.createQuery("delete User")
+                    .executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
         }
     }
 }
