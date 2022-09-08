@@ -4,6 +4,7 @@ import jm.task.core.jdbc.model.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.service.ServiceRegistry;
 
 import java.io.IOException;
@@ -16,24 +17,25 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class Util {
-    static Connection connection;
-
     // реализуйте настройку соеденения с БД
-    // private Connection connection;
-    public static Connection getConnection() {
-        if (connection != null) return connection;
-        try {
+   // private Connection connection;
+    public Connection getConnection(){
+        Connection conn;
+
+        try{
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-        } catch (Exception ex) {
+        }
+        catch(Exception ex){
             System.out.println("JDBC driver failed...");
             System.out.println(ex);
         }
 
         Properties props = new Properties();
-        try (InputStream in = Files.newInputStream(Paths.get("database.properties"))) {
+        try(InputStream in = Files.newInputStream(Paths.get("database.properties"))){
             props.load(in);
         } catch (IOException e) {
             System.out.println("IO error: properties not found!");
+            throw new RuntimeException();
         }
 
         String url = props.getProperty("url");
@@ -41,33 +43,36 @@ public class Util {
         String password = props.getProperty("password");
 
         try {
-            connection = DriverManager.getConnection(url, username, password);
+            conn = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
-            System.out.println("connection failed... " + e.getMessage());
+            throw new RuntimeException(e);
         }
-        return connection;
+    return conn;
     }
 
-    public SessionFactory getSessionFactory() {
-        try {
+    public SessionFactory getSessionFactory(){
+        try{
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-        } catch (Exception ex) {
+        }
+        catch(Exception ex){
             System.out.println("JDBC driver failed...");
             System.out.println(ex);
         }
 
-        try {
+        try{
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-        } catch (Exception ex) {
+        }
+        catch(Exception ex){
             System.out.println("JDBC driver failed...");
             System.out.println(ex);
         }
 
         Properties props = new Properties();
-        try (InputStream in = Files.newInputStream(Paths.get("database.properties"))) {
+        try(InputStream in = Files.newInputStream(Paths.get("database.properties"))){
             props.load(in);
         } catch (IOException e) {
-            System.out.println("IO error: properties not found!" + e.getMessage());
+            System.out.println("IO error: properties not found!");
+            throw new RuntimeException();
         }
 
         Configuration configuration = new Configuration();
