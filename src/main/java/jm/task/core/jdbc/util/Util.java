@@ -4,7 +4,6 @@ import jm.task.core.jdbc.model.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.service.ServiceRegistry;
 
 import java.io.IOException;
@@ -17,21 +16,20 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class Util {
-    // реализуйте настройку соеденения с БД
-   // private Connection connection;
-    public Connection getConnection(){
-        Connection conn;
+    private static Connection connection;
+    private static SessionFactory sessionFactory;
 
-        try{
+    public static Connection getConnection() {
+        if (connection != null) return connection;
+        try {
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println("JDBC driver failed...");
             System.out.println(ex);
         }
 
         Properties props = new Properties();
-        try(InputStream in = Files.newInputStream(Paths.get("database.properties"))){
+        try (InputStream in = Files.newInputStream(Paths.get("database.properties"))) {
             props.load(in);
         } catch (IOException e) {
             System.out.println("IO error: properties not found!");
@@ -43,32 +41,24 @@ public class Util {
         String password = props.getProperty("password");
 
         try {
-            conn = DriverManager.getConnection(url, username, password);
+            connection = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    return conn;
+        return connection;
     }
 
-    public SessionFactory getSessionFactory(){
-        try{
+    public static SessionFactory getSessionFactory() {
+        if (sessionFactory != null) return sessionFactory;
+        try {
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-        }
-        catch(Exception ex){
-            System.out.println("JDBC driver failed...");
-            System.out.println(ex);
-        }
-
-        try{
-            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println("JDBC driver failed...");
             System.out.println(ex);
         }
 
         Properties props = new Properties();
-        try(InputStream in = Files.newInputStream(Paths.get("database.properties"))){
+        try (InputStream in = Files.newInputStream(Paths.get("database.properties"))) {
             props.load(in);
         } catch (IOException e) {
             System.out.println("IO error: properties not found!");
@@ -80,10 +70,7 @@ public class Util {
         configuration.addAnnotatedClass(User.class);
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties()).build();
-
-        SessionFactory sf = configuration.buildSessionFactory(serviceRegistry);
-
-        System.out.println(sf);
-        return sf;
+        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+        return sessionFactory;
     }
 }
