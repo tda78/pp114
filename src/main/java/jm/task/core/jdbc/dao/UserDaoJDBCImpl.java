@@ -8,31 +8,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    private Connection connection = new Util().getConnection();
-
+    private static Connection connection = Util.getConnection();
+/*
     private int executeUpdate(String query) throws SQLException {
         Statement statement = connection.createStatement();
         // Для Insert, Update, Delete
         int result = statement.executeUpdate(query);
         return result;
     }
-
+*/
     public UserDaoJDBCImpl() {
     }
 
     public void createUsersTable() {
         try {
-            executeUpdate("create table if not exists users (id int NOT NULL AUTO_INCREMENT, name text, lastName text, age int, PRIMARY KEY (id))");
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("create table if not exists users (id int NOT NULL AUTO_INCREMENT, name text, lastName text, age int, PRIMARY KEY (id))");
+            statement.close();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("can't create table" +  e.getMessage());
         }
     }
 
     public void dropUsersTable() {
         try {
-            executeUpdate("drop table if exists users");
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("drop table if exists users");
+            statement.close();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Cant drop table " + e.getMessage());
         }
     }
 
@@ -66,7 +70,7 @@ public class UserDaoJDBCImpl implements UserDao {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from users");
 
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 User user = new User();
                 user.setId(resultSet.getLong("id"));
                 user.setName(resultSet.getString("name"));
@@ -82,9 +86,11 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void cleanUsersTable() {
         try {
-            executeUpdate("delete from users");
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("delete from users");
+            statement.close();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());       }
-
+            System.out.println("can't clear table" + e.getMessage());
+        }
     }
 }
