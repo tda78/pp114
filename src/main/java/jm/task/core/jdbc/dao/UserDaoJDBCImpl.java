@@ -8,42 +8,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
+    private final String SQL_CREATE_USERS_TABLE = "create  table if not exists users (id int NOT NULL AUTO_INCREMENT, name text, lastName text, age int, PRIMARY KEY (id))";
+    private final String SQL_DROP_USERS_TABLE = "drop table if exists users";
+    private final String SQL_CLEAR_USERS_TABLE = "delete from users";
+    private final String SQL_SAVE_USER = "insert into users(name, lastName, age) values (?, ?, ?)";
+    private final String SQL_DELETE_USER = "delete from users where id = ?";
+    private final String SQL_GET_USERS = "select * from users";
     private static Connection connection = Util.getConnection();
-/*
-    private int executeUpdate(String query) throws SQLException {
-        Statement statement = connection.createStatement();
-        // Для Insert, Update, Delete
-        int result = statement.executeUpdate(query);
-        return result;
+
+    private void executeUpdate(String query) {
+        try {
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(query);
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage() + " , query: " + query);
+        }
     }
-*/
+
     public UserDaoJDBCImpl() {
     }
 
     public void createUsersTable() {
-        try {
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("create table if not exists users (id int NOT NULL AUTO_INCREMENT, name text, lastName text, age int, PRIMARY KEY (id))");
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("can't create table" +  e.getMessage());
-        }
+        executeUpdate(SQL_CREATE_USERS_TABLE);
     }
 
     public void dropUsersTable() {
-        try {
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("drop table if exists users");
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Cant drop table " + e.getMessage());
-        }
+        executeUpdate(SQL_DROP_USERS_TABLE);
     }
 
     public void saveUser(String name, String lastName, byte age) {
         try {
-            String sql = "insert into users(name, lastName, age) values (?, ?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_USER);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
@@ -55,8 +51,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         try {
-            String sql = "delete from users where id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE_USER);
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -68,8 +63,7 @@ public class UserDaoJDBCImpl implements UserDao {
         List<User> users = new ArrayList<>();
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from users");
-
+            ResultSet resultSet = statement.executeQuery(SQL_GET_USERS);
             while (resultSet.next()) {
                 User user = new User();
                 user.setId(resultSet.getLong("id"));
@@ -85,12 +79,6 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        try {
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("delete from users");
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("can't clear table" + e.getMessage());
-        }
+        executeUpdate(SQL_CLEAR_USERS_TABLE);
     }
 }
